@@ -1,0 +1,8 @@
+### Gradle template
+.gradle/
+build/
+.idea/
+!gradle-wrapper.jar
+*.iml
+local.properties
+out/

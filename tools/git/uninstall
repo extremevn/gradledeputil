@@ -1,0 +1,10 @@
+#!/bin/sh
+echo "Uninstalling..."
+cd scripts
+for file in *
+do
+   name="${file%.*}"
+   rm ../../../.git/hooks/$name
+done
+cd ..
+echo "Done"

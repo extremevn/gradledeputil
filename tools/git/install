@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Installing..."
+cp config.sh scripts/
+cd scripts
+for file in *
+do
+   name="${file%.*}"
+   cp $file ../../../.git/hooks/$name
+done
+rm scripts/config.sh
+cd ..
+echo "Done"

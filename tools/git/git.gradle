@@ -1,0 +1,46 @@
+static def isLinuxOrMacOs() {
+    def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
+    return osName.contains('linux') || osName.contains('mac os') || osName.contains('macos')
+}
+
+task copyGitHookConfig(type: Copy) {
+    description "Copies the config for git hooks from ${rootDir}/tools/git/ to the scripts/ folder."
+    from "${rootDir}/tools/git/config.sh"
+    into "${rootDir}/tools/git/scripts/"
+}
+
+task deleteGitHookConfig(type: Delete) {
+    description "Delete the config for git hooks from ${rootDir}/tools/git/scripts"
+    delete  "${rootDir}/tools/git/scripts/config.sh"
+}
+
+task copyGitHooks(type: Copy) {
+    description "Copies the git hooks from ${rootDir}/tools/git/scripts/ to the .git folder."
+    from("${rootDir}/tools/git/scripts/") {
+        include '**/*.sh'
+        rename '(.*).sh', '$1'
+    }
+    into "${rootDir}/.git/hooks"
+    dependsOn copyGitHookConfig
+}
+
+task installGitHooks(type: Exec) {
+    description "Installs the git hooks from ${rootDir}tools/git/scripts/."
+    group 'git hooks'
+    workingDir rootDir
+    commandLine 'chmod'
+    args '-R', '+x', '.git/hooks/'
+    dependsOn copyGitHooks
+    finalizedBy deleteGitHookConfig
+    onlyIf { isLinuxOrMacOs() }
+    doLast {
+        println('Git hook installed successfully.')
+    }
+}
+
+
+afterEvaluate {
+    // We install the hook at the first occasion
+    tasks['clean'].dependsOn installGitHooks
+    tasks['assemble'].dependsOn installGitHooks
+}
