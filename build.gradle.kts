@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
         maven {
             url = uri("https://plugins.gradle.org/m2/")
@@ -12,7 +13,10 @@ buildscript {
 plugins {
     kotlin("jvm") version "1.3.41"
     `java-gradle-plugin`
+    `maven-publish`
     `kotlin-dsl`
+    // Publish plugins to the Gradle Plugin Portal
+    id("com.gradle.plugin-publish") version "0.14.0"
     id("io.gitlab.arturbosch.detekt") version "1.16.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
@@ -22,23 +26,11 @@ apply {
     from("${project.rootDir}/tools/git/git.gradle")
 }
 
-group = "vn.com.extremevn.gradle"
-version = "1.0.0"
-
 repositories {
     mavenCentral()
     jcenter()
     maven {
         url = uri("https://plugins.gradle.org/m2/")
-    }
-}
-
-gradlePlugin {
-    plugins {
-        register("gradle-dependency-util") {
-            id = "vn.com.extremevn.gradle.deputil"
-            implementationClass = "vn.com.extremevn.gradle.deputil.GradleDependencyUtilPlugin"
-        }
     }
 }
 
@@ -72,4 +64,28 @@ detekt {
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+group = "vn.com.extremevn.gradle"
+version = "1.0.0"
+
+gradlePlugin {
+    plugins {
+        register("gradleDependencyUtil") {
+            id = "vn.com.extremevn.gradle.deputil"
+            implementationClass = "vn.com.extremevn.gradle.deputil.GradleDependencyUtilPlugin"
+        }
+    }
+}
+
+pluginBundle {
+    description = "A grade plugin for dependencies version utilities"
+    website = "https://github.com/extremevn/gradledeputil"
+    vcsUrl = "https://github.com/extremevn/gradledeputil"
+    tags = listOf("dependencies", "versions", "updates")
+    (plugins) {
+    "gradleDependencyUtil" {
+            displayName = "Gradle Dependency Util Plugin"
+        }
+    }
 }
